@@ -1,13 +1,22 @@
+body {
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background-color:#777
+}
+
 .scenario_title {
     background-color: black;
     color: white;
     padding:1em;
+    height:5%;
 }
 
 /* UI Canvas */
 .main_canvas {
-        z-index:1;
+    z-index:1;
 	background-color: #EEE;
+    width:100%;
 	height:700px;
     -khtml-user-drag: element;
 }
@@ -66,20 +75,53 @@
 .main_ctrl {
 	background-color: #EFE;
 	text-align:center;
-        height:100px;
+/*    height:100px; */
+    height:25%;
 }
+
+.ctx_menu {
+    position:absolute;
+    padding: 1em;
+    background-color: #BBB;
+    border: 1px solid black;
+    border-radius: 10px;
+    box-shadow:1px 3px 4px 3px #666
+}
+.ctx_menu p {
+    margin:0;
+    padding:2px
+}
+.ctx_menu_title {
+    text-align:right;
+    border-bottom:1px dotted #666;
+    color:#666;
+}
+
+.scn_win_flap {
+    right:0;
+    position:absolute;
+    width:16px;
+    height:300px;
+    cursor: pinter;
+    border-radius: 8px 0 0 8px;
+    background-color: #f00;
+}
+
 
 /* Scenario Writer */
 
 
 .scenario_window {
+    width:40%;
+    height:100%;
         z-index: 5;
-	background-color:black;
-	border:1px solid black;
+        padding:0;
+        margin:0;
+	    background-color:black;
+	    border:1px solid black;
     	float:right;
         height:800px;
         overflow: auto;
-	visibility: hidden;
         display:none;
 }
 .scn_segment {
@@ -101,12 +143,25 @@
 	padding:3px;
 	background-color: #BDB;
 }
+.run_option{
+    border-top: none;
+    border:1px dotted #858;
+}
+
 .stm {
 	background-color: #CFC;
-	border-radius: 5px;
+/*	border-radius: 5px; */
 	padding:0.5em;
-	border:1px solid #636;
+    border:1px dotted #858;
+
+    border-top: none;
+    border-bottom: none;
 }
+/*
+.stm:active{
+	background-color: #EFE;
+}
+*/
 .exp {
 	border-radius: 10px;
 	border:1px solid #979;
@@ -117,6 +172,7 @@
 }
 
 .stm_holl {
+    margin-left:2.0em;
 	background-color:#666;
 	padding-bottom:1em;
 	-khtml-user-drag: element;
@@ -131,3 +187,26 @@
     -khtml-user-drag: element;
 }
 
+.script_tray_header {
+	background-color:#ACA;
+    color:#666;
+}
+
+.script_tray {
+    background-color:#666;
+    padding-bottom:1em;
+}
+
+.script_title{
+/*      background-color:#AA8;
+    border-left:0.5em;
+    border-right:0.5em;
+    border-radius: 5px 10px 20px 30px;*/
+    margin:2px;
+    padding-left:0.2em;
+    padding-right:0.2em;
+    border-radius: 3px;
+	background-color:#A2C8A2;
+	min-width:100px;
+
+}

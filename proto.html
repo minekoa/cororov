@@ -3,11 +3,12 @@
 <head>
 	<meta charset='UTF-8'>
 	<link rel='stylesheet' href='main.css'>
-
+    
 	<title></title>
 <script src="http://code.jquery.com/jquery-3.0.0.min.js"></script>
-<script src="proto.js"></script>
+<script src="proto.js" type="text/javascript"></script>
 <script>
+
 
 $(function() {
     $(".exp").attr("draggable","true");
@@ -52,81 +53,28 @@ $(function() {
     $("#make_variable").bind("click", onMakeVariable);
 
     $(".stm_holl").bind("click", onStmHollClick);
-    $("#stmmenu_ifelse").bind("click", onMakeIfElseStm);
-    $("#stmmenu_close").bind("click", onStmMenuClose);
+
+    $('.scn_win_flap').on('click', showScenarioPanel);
+    $(".script_tray").on('click', onScriptTrayClick);
+    $(".script_tray").on('click', '.stm_holl',    onStmHollClick);
+    $(".script_tray").on('click', '.script_closer', foldScript );
+    $(".script_tray").on('click', '.script_title', editScriptTitle);
+
+    $(".script_tray").on('click', '.stm_closer'   , foldStatement);
+    $(".script_tray").on('click', '.stm_title'    , editStatementTitle);
 });
 </script>
 </head>
 <body>
+<div class="scn_win_flap"></div>
 
 <div class="scenario_window">
-	<div class="scn_segment">
-	<h2>最初に一度だけ</h2>
-		<div class="stm_holl">
-<!--
-			<div class="stm">move end effector to:<span class="exp"><input type="text"></span> time: <span class="exp"><input type="text"></span></div>
-			<div class="stm">if <span class="exp_holl"><span class="exp">a</span></span> == <span class="exp_holl"><span class="exp"><input type="text"></span></span><br>
-			then
-			<div class="stm_holl">
-				<div class="stm" draggable="true">xxx</div>
-			</div>
-			else
-			<div class="stm_holl">
-				<div class="stm">xx</div>
-			</div>
-			</div>
--->
-		</div>
-	</div>
-	<hr>
-	<div class="scn_segment">
-	<h2>本体「ロボット」</h2>
-		<div class="scn_ctrl_panel">
-	           <input type="checkbox" name="exec_options" value="progn">一度だけ実行
-	           <input type="checkbox" name="exec_options" value="repeat" checked>繰り返し実行
-		</div>
-		<div class="stm_holl">
-<!--
-			<div class="stm">move end effector to; <span class="exp_holl"><span class="exp"><input type="text"></span></span></div>
-			<div class="stm">もし<span class="exp_holl"><span class="exp">ロボットGO</span></span> == <span class="exp_holl"><span class="exp"><select name="ONOFF"><option selected>ON</option><option>OFF</option></select></span></span>
-			ならば
-				<div class="stm">xxx</div>
-			そうじゃないとき
-				<div class="stm">pass</div>
-			</div>
-			<div class="stm">
-                                hogehoge = 
-				<span class="exp_holl"></span> + 
-				<span class="exp_holl"></span> / 
-				<span class="exp_holl"></span> * 
-				<span class="exp_holl"></span> - 
-				<span class="exp_holl"></span>
-			</div>
--->
-		</div>
-	</div>
-	<div class="scn_segment">
-	<h2>本体「チューブ通過センサーの監視」</h2>
-		<div class="scn_ctrl_panel">
-	           <input type="checkbox" name="exec_options" value="progn">一度だけ実行
-	           <input type="checkbox" name="exec_options" value="repeat" checked>繰り返し実行
-		</div>
-		<div class="stm_holl">
-			<div class="stm">if <span class="exp_holl"><span class="exp">dio read port:<span class="exp_holl"><span class="exp">4</span></span></span></span> == <span class="exp_holl"><span class="exp">5</span></span><br/>
-			then
-				<div class="stm_holl"><div class="stm"><span class="exp">ロボットGo!</span> = <span class="exp_holl"><span class="exp"><select name="ONOFF"><option selected>ON</option><option>OFF</option></select></span></span></div></div>
-			else	
-				<div class="stm_holl"><div class="stm"><span class="exp">ロボットGo!</span> = <span class="exp_holl"><span class="exp"><select name="ONOFF"><option >ON</option><option selected>OFF</option></select></span></span></div></div>
-			</div>
-		</div>
-	</div>
-	<hr>
-	<div class="scn_segment">
-	<h2>最後に一度だけ</h2>
-		<div class="stm_holl">
-		</div>
-	</div>
-
+  <div class="script_tray_header">initializer (最初に一度だけ)</div>
+  <div class="script_tray" category="initializer"></div>
+  <div class="script_tray_header">body (全部が並列にに動き出します)</div>
+  <div class="script_tray" category="body"></div>
+  <div class="script_tray_header">terminator (最後の後始末)</div>
+  <div class="script_tray" category="terminator"></div>
 
 	<div class="stm_menu">
 		<p id="stmmenu_ifelse">if-else文</p>
@@ -138,18 +86,7 @@ $(function() {
 シナリオ名 [資生堂チューブピック] <span style="color:red">(編集中)</span>
 </div>
 <div class="main_canvas">
-    <div class="variable" varname="ロボットGO!">変数:<span class="vname">ロボットGO!</span><div class="vvalue">ON</div></div>
-
-    <div class="world_menu">
-        <p id="open_scn_window">シナリオを開く</p>
-        <p id="make_variable">変数の作成</p>
-	<p>デバイスを追加</p>
-        <p>編集を終了する</p>
-    </div>
-
-
 </div>
-
 <div class="main_ctrl">
 	<img src="start.png" height="90">
 </div>
