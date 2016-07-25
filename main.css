@@ -1,0 +1,133 @@
+.scenario_title {
+    background-color: black;
+    color: white;
+    padding:1em;
+}
+
+/* UI Canvas */
+.main_canvas {
+        z-index:1;
+	background-color: #EEE;
+	height:700px;
+    -khtml-user-drag: element;
+}
+
+.variable {
+	border-radius: 20px;
+	border: 3px solid #77F;
+        background-color: #AAF;
+	padding:0.5em;
+	width:8em;
+        text-align:center;
+	position:absolute;
+}
+.vname {
+	padding: 2px;
+	background-color: #BBF;
+}
+.vvalue {
+	background-color: #DDF;
+	border:1px solid #666;
+	margin-top:1em;
+	margin-left:1em;
+	margin-right:1em;
+	padding: 0.3em;
+}
+
+.world_menu {
+    visibility:hidden;
+    position:absolute;
+    padding: 1em;
+    background-color: #BBB;
+    border: 1px solid black;
+    border-radius: 10px;
+    box-shadow:1px 3px 4px 3px #666
+}
+.world_menu p {
+    margin:0;
+    padding:2px
+}
+
+.stm_menu {
+    visibility:hidden;
+    position:absolute;
+    padding: 1em;
+    background-color: #BBB;
+    border: 1px solid black;
+    border-radius: 10px;
+    box-shadow:1px 3px 4px 3px #666
+}
+.stm_menu p {
+    margin:0;
+    padding:2px
+}
+
+/* Control Panel*/
+.main_ctrl {
+	background-color: #EFE;
+	text-align:center;
+        height:100px;
+}
+
+/* Scenario Writer */
+
+
+.scenario_window {
+        z-index: 5;
+	background-color:black;
+	border:1px solid black;
+    	float:right;
+        height:800px;
+        overflow: auto;
+	visibility: hidden;
+        display:none;
+}
+.scn_segment {
+	border: 3px solid #ACA;
+	border-left: 10px solid #ACA;
+	background-color: #CFC;
+	padding:0px;
+	border-radius: 10px;
+        margin-top:1px;
+}
+.scn_segment h2 {
+	margin-top:0px;
+	margin-bottom:0px;
+	font-size: 1.2em;
+	color: white;
+	background-color:#ACA;
+}
+.scn_ctrl_panel {
+	padding:3px;
+	background-color: #BDB;
+}
+.stm {
+	background-color: #CFC;
+	border-radius: 5px;
+	padding:0.5em;
+	border:1px solid #636;
+}
+.exp {
+	border-radius: 10px;
+	border:1px solid #979;
+	padding: 2px;
+	background-color: #EFE;
+	margin:2px;
+	padding: 1px 0.5em;
+}
+
+.stm_holl {
+	background-color:#666;
+	padding-bottom:1em;
+	-khtml-user-drag: element;
+}
+
+.exp_holl {
+	min-width:50px;
+    border: 1px solid #888;
+    border-radius: 20px;
+    background-color:#888;
+    padding:0.1em 0.3em;
+    -khtml-user-drag: element;
+}
+

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset='UTF-8'>
+	<link rel='stylesheet' href='main.css'>
+
+	<title></title>
+<script src="http://code.jquery.com/jquery-3.0.0.min.js"></script>
+<script src="proto.js"></script>
+<script>
+
+$(function() {
+    $(".exp").attr("draggable","true");
+    $(".exp").bind("dragstart", onDragStart);
+    $(".exp").each(function(i){
+        $(this).attr('id', "exp-" + i);
+    });
+
+    $(".exp_holl").attr("dropzone","move"); 
+    $(".exp_holl").bind("dragover", onDragOver);
+    $(".exp_holl").bind("drop", onExpDrop);
+    $(".exp_holl").each(function(i){	
+        $(this).attr('id', "eholl-" + i);
+    });
+
+    $(".stm").attr("draggable","true");
+    $(".stm").bind("dragstart", onDragStart);
+    $(".stm").each(function(i){
+        $(this).attr('id', "stm-" + i);
+    });
+
+    $(".stm_holl").attr("dropzone","move");
+    $(".stm_holl").bind("dragover", onDragOver);
+    $(".stm_holl").bind("drop", onStmDrop);
+    $(".stm_holl").each(function(i){	
+        $(this).attr('id', "sholl-" + i);
+    });
+
+    $(".variable").attr("draggable","true");
+    $(".variable").bind("dragstart", onDragStart);
+    $(".variable").each(function(i){	
+        $(this).attr('id', "var-" + i);
+    });
+
+    $(".main_canvas").attr("dropzone","move");
+    $(".main_canvas").attr("id","the-main");
+    $(".main_canvas").bind("dragover", onDragOver);
+    $(".main_canvas").bind("drop", onMainCanvasDrop);
+
+    $(".main_canvas").bind("click", onMainCanvasClick);
+    $("#open_scn_window").bind("click", onOpenScenarioWindow);
+    $("#make_variable").bind("click", onMakeVariable);
+
+    $(".stm_holl").bind("click", onStmHollClick);
+    $("#stmmenu_ifelse").bind("click", onMakeIfElseStm);
+    $("#stmmenu_close").bind("click", onStmMenuClose);
+});
+</script>
+</head>
+<body>
+
+<div class="scenario_window">
+	<div class="scn_segment">
+	<h2>最初に一度だけ</h2>
+		<div class="stm_holl">
+<!--
+			<div class="stm">move end effector to:<span class="exp"><input type="text"></span> time: <span class="exp"><input type="text"></span></div>
+			<div class="stm">if <span class="exp_holl"><span class="exp">a</span></span> == <span class="exp_holl"><span class="exp"><input type="text"></span></span><br>
+			then
+			<div class="stm_holl">
+				<div class="stm" draggable="true">xxx</div>
+			</div>
+			else
+			<div class="stm_holl">
+				<div class="stm">xx</div>
+			</div>
+			</div>
+-->
+		</div>
+	</div>
+	<hr>
+	<div class="scn_segment">
+	<h2>本体「ロボット」</h2>
+		<div class="scn_ctrl_panel">
+	           <input type="checkbox" name="exec_options" value="progn">一度だけ実行
+	           <input type="checkbox" name="exec_options" value="repeat" checked>繰り返し実行
+		</div>
+		<div class="stm_holl">
+<!--
+			<div class="stm">move end effector to; <span class="exp_holl"><span class="exp"><input type="text"></span></span></div>
+			<div class="stm">もし<span class="exp_holl"><span class="exp">ロボットGO</span></span> == <span class="exp_holl"><span class="exp"><select name="ONOFF"><option selected>ON</option><option>OFF</option></select></span></span>
+			ならば
+				<div class="stm">xxx</div>
+			そうじゃないとき
+				<div class="stm">pass</div>
+			</div>
+			<div class="stm">
+                                hogehoge = 
+				<span class="exp_holl"></span> + 
+				<span class="exp_holl"></span> / 
+				<span class="exp_holl"></span> * 
+				<span class="exp_holl"></span> - 
+				<span class="exp_holl"></span>
+			</div>
+-->
+		</div>
+	</div>
+	<div class="scn_segment">
+	<h2>本体「チューブ通過センサーの監視」</h2>
+		<div class="scn_ctrl_panel">
+	           <input type="checkbox" name="exec_options" value="progn">一度だけ実行
+	           <input type="checkbox" name="exec_options" value="repeat" checked>繰り返し実行
+		</div>
+		<div class="stm_holl">
+			<div class="stm">if <span class="exp_holl"><span class="exp">dio read port:<span class="exp_holl"><span class="exp">4</span></span></span></span> == <span class="exp_holl"><span class="exp">5</span></span><br/>
+			then
+				<div class="stm_holl"><div class="stm"><span class="exp">ロボットGo!</span> = <span class="exp_holl"><span class="exp"><select name="ONOFF"><option selected>ON</option><option>OFF</option></select></span></span></div></div>
+			else	
+				<div class="stm_holl"><div class="stm"><span class="exp">ロボットGo!</span> = <span class="exp_holl"><span class="exp"><select name="ONOFF"><option >ON</option><option selected>OFF</option></select></span></span></div></div>
+			</div>
+		</div>
+	</div>
+	<hr>
+	<div class="scn_segment">
+	<h2>最後に一度だけ</h2>
+		<div class="stm_holl">
+		</div>
+	</div>
+
+
+	<div class="stm_menu">
+		<p id="stmmenu_ifelse">if-else文</p>
+		<p id="stmmenu_close">(x)</p>
+	</div>
+</div>
+
+<div class="scenario_title">
+シナリオ名 [資生堂チューブピック] <span style="color:red">(編集中)</span>
+</div>
+<div class="main_canvas">
+    <div class="variable" varname="ロボットGO!">変数:<span class="vname">ロボットGO!</span><div class="vvalue">ON</div></div>
+
+    <div class="world_menu">
+        <p id="open_scn_window">シナリオを開く</p>
+        <p id="make_variable">変数の作成</p>
+	<p>デバイスを追加</p>
+        <p>編集を終了する</p>
+    </div>
+
+
+</div>
+
+<div class="main_ctrl">
+	<img src="start.png" height="90">
+</div>
+
+</body>
+</html>
