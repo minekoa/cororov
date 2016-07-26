@@ -7,6 +7,30 @@ var id_generator = {
     }
 };
 
+//------------------------------------------------------------
+// 共通
+//------------------------------------------------------------
+
+var editText = function(target, open_char, close_char){
+    if ($(target).attr("mode") == "edit") {
+        var txt = $(target).children('input').val();
+        $(target).text(open_char + txt + close_char);
+        $(target).remove('input');
+        $(target).attr("mode", 'view');
+    }
+    else {
+        var txt = $(target).text();
+        $(target).text('');
+        $(target).append(open_char + '<input type="text" value="' + txt.slice(1,-1) + '"/>' + close_char);
+        $(target).append('☑');
+        $(target).attr("mode", 'edit');
+    }
+};
+
+//------------------------------------------------------------
+// Drag and Drop
+//------------------------------------------------------------
+
 function onDragStart(event) {
     event.originalEvent.dataTransfer.setData("text", event.target.id);
     console.log('drag_start:' + event.target.id);
@@ -30,15 +54,27 @@ function onStmDrop(event) {
         $('#'+id_name).appendTo($(event.target));
     }
     else if ($('#'+id_name).attr("class") == "variable") {
-	var vname =$('#'+id_name).attr("varname");
-        var sid  = 'stm-' + $(".stm").length;
-        var ehid = 'eholl-' + $(".exp_holl").length;
-	$(event.target).append($("<div class='stm' id="+sid+">"+ vname + "= <span class='exp_holl' id="+ehid+"></span></div>"));
-        $("#"+sid).attr("draggable","true");
-        $("#"+sid).bind("dragstart", onDragStart);
-        $("#"+ehid).attr("dropzone","move"); 
-        $("#"+ehid).bind("dragover", onDragOver);
-        $("#"+ehid).bind("drop", onExpDrop);
+	    var vname = $('#'+id_name).attr("vname");
+        var vtype = $('#'+id_name).attr("vtype");
+
+        var stm_id   = id_generator.generate('stm');
+        var eholl_id = id_generator.generate('eholl');
+
+        var html = '';
+        html += '<div class="stm" '
+              + 'id="'    + stm_id + '" ' 
+              + 'vname="' + vname  + '" >';
+        html += vname + ' ← ';
+        html += '<span class="exp_holl" id="' + eholl_id + '" vtype="' + vtype + '"></span>';
+        html += '</div>';
+        $(event.target).append(html);
+
+        $("#"+stm_id).attr("draggable","true");
+        $("#"+stm_id).bind("dragstart", onDragStart);
+
+        $("#"+eholl_id).attr("dropzone","move"); 
+        $("#"+eholl_id).bind("dragover", onDragOver);
+        $("#"+eholl_id).bind("drop", onExpDrop);
 
         return false
     }
@@ -60,14 +96,21 @@ function onExpDrop(event) {
 	    $('#'+id_name).appendTo($(event.target));
     }
     else if ($('#'+id_name).attr("class") == "variable") {
-	var vname =$('#'+id_name).attr("varname");
-        var eid = "exp-"+ $(".exp").length;
+	    var vname =$('#'+id_name).attr("vname");
+	    var vtype =$('#'+id_name).attr("vtype");
+        var eid = id_generator.generate("exp");
 
-	$(event.target).append($("<span class='exp' id=" + eid + ">"+ vname + "</span>"));
-	$("#"+eid).attr("draggable","true");
+        var html = '';
+        html += "<span class='exp' id=" + eid + ">"
+        html += vname;
+        html += "<span class='operator_editor' vtype='" + vtype + "'>✒</span>";
+        html += "</span>";
+
+	    $(event.target).append($(html));
+	    $("#"+eid).attr("draggable","true");
         $("#"+eid).bind("dragstart", onDragStart);
 
-	return false;
+	    return false;
     }
     else {
         return false;
@@ -75,6 +118,20 @@ function onExpDrop(event) {
 
     event.preventDefault();
 }
+
+var onRubbishtipDrop = function (event) {
+    if ($(event.target).attr("id") != "rubbishtip") {
+        return false;
+    }
+
+    var id_name = event.originalEvent.dataTransfer.getData("text");
+    console.log('on drop ' + id_name + " to " + event.target.id);
+    $('#'+id_name).remove();
+}
+
+//------------------------------------------------------------
+// Action (ScenarioPanel)
+//------------------------------------------------------------
 
 var showScenarioPanel = function() {
     $(".scenario_window").css("display", "block");
@@ -91,15 +148,58 @@ var hideScenarioPanel = function() {
     $('.scn_win_flap').on('click', showScenarioPanel);
 };
 
+//------------------------------------------------------------
+// Action (Variable)
+//------------------------------------------------------------
+var editVariableName = function(event){
+    if ($(event.target).attr("class") != "vname") {
+        return false;
+    }
+
+    editText($(event.target),  '[', ']');
+    if ($(event.target).attr('mode') == 'view') {
+        $(event.target).parent().attr('vname', $(event.target).text().slice(1,-1));
+    }
+    
+    return false;
+}
+
+
+//------------------------------------------------------------
+// Widgets Creator
+//------------------------------------------------------------
+
 var createVariableWidget = function(event, parent, vtype){
     var vid = id_generator.generate('var');
 
     var html = '';
-    html += '<div class="variable" id="'+ vid +'">';
+    html += '<div class="variable" id="'+ vid +'" vname="' + vid +'" vtype="' + vtype + '">';
     html += '変数:<span class="vname">['+ vid +']</span></br>';
-    html += '= <div class="vvalue" vtype="'+vtype+'"></div>';
+    html += '<div class="vvalue" vtype="'+vtype+'">';
     html += '</div>';
-    $(parent).append(html);
+    html += '</div>';
+    var dom = $(html);
+
+    // 暫定（値コンストラクターを流用）
+    switch (vtype) {
+    case 'real':
+        createRealNumConstractor($(dom).children('.vvalue'), 0.0);
+        break;
+    case 'int':
+        createIntNumConstractor($(dom).children('.vvalue'), 0);
+        break;
+    case 'bool':
+        createBoolConstractor($(dom).children('.vvalue'), true, 'true', 'false');
+        break;
+    case 'onoff':
+        createBoolConstractor($(dom).children('.vvalue'), true, 'ON', 'OFF');
+        break;
+    case 'string':
+        createStringConstractor($(dom).children('.vvalue'), '');
+        break;
+    }
+
+    $(parent).append(dom);
 
     $("#"+vid).css("top",  event.offsetY + $(event.target).offset().top);
     $("#"+vid).css("left", event.offsetX + $(event.target).offset().left);
@@ -109,6 +209,10 @@ var createVariableWidget = function(event, parent, vtype){
 
     return true;
 };
+
+//------------------------------------------------------------
+// 各種ポップアップメニュー
+//------------------------------------------------------------
 
 var onMainCanvasClick = function(event) {
     console.log("maincanvas clicked " + $(".world_menu").css("visibility"));
@@ -163,6 +267,101 @@ var onStmHollClick = function(event) {
     return false;
 };
 
+var onExpHollClick = function(event) {
+    if ($(event.target).attr("class") != "exp_holl") {
+        return false;
+    }
+    if ($(event.target).children('.exp').length) {
+        console.log('already exist exp');
+        return false;
+    }
+
+    var model={};
+    switch ($(event.target).attr('vtype')) {
+    case 'real':
+        model['値を入れる'] = function(e){createRealNumConstractor(event.target, 0.0);};
+        break;
+    case 'int':
+        model['値を入れる'] = function(e){createIntNumConstractor(event.target, 0);};
+        break;
+    case 'bool':
+    case 'onoff':
+        model['値を入れる(true/false)'] = function(e){createBoolConstractor(event.target, true, 'true', 'false');};
+        model['値を入れる(on/off)']     = function(e){createBoolConstractor(event.target, true, 'ON', 'OFF');};
+        break;
+    case 'string':
+        model['値を入れる'] = function(e){createStringConstractor(event.target, '');};
+        break;
+    }
+
+    contextMenu_show($('.main_canvas'), 'expression',  model);
+
+    $(".ctx_menu").css("top", event.offsetY+ $(event.target).offset().top);
+//    $(".ctx_menu").css("left", event.offsetX + $(event.target).offset().left);
+    return false;
+}
+
+var onOperatorEditClick = function(event) {
+    if ($(event.target).attr("class") != "operator_editor") {
+        return false;
+    }
+
+    var create_compare_model = function(vtype) {
+        var comp_model = {};
+        comp_model['＝'] = function(e){ bin_ope_replace($(event.target), vtype, vtype, '＝'); };
+        comp_model['≠'] = function(e){ bin_ope_replace($(event.target), vtype, vtype, '≠'); };
+        comp_model['＜'] = function(e){ bin_ope_replace($(event.target), vtype, vtype, '＜'); };
+        comp_model['＞'] = function(e){ bin_ope_replace($(event.target), vtype, vtype, '＞'); };
+        comp_model['≦'] = function(e){ bin_ope_replace($(event.target), vtype, vtype, '≦'); };
+        comp_model['≧'] = function(e){ bin_ope_replace($(event.target), vtype, vtype, '≧'); };
+        return comp_model;
+    };
+
+    var bin_ope_replace = function(target, rettype, paramtype, operator) {
+        var rhs    = $(target).parent()
+        var parent = $(rhs).parent();
+        $(rhs).remove();
+        createBinOperatorWidget(parent, rettype, paramtype, operator, rhs);
+    };
+
+    var model={};
+    switch ($(event.target).attr('vtype')) {
+    case 'real':
+        console.log('a');
+        model['＋'] = function(e){ bin_ope_replace($(event.target), 'real','real', '＋'); };
+        model['−'] = function(e){ bin_ope_replace($(event.target), 'real','real', '−'); };
+        model['×'] = function(e){ bin_ope_replace($(event.target), 'real','real', '×'); };
+        model['÷'] = function(e){ bin_ope_replace($(event.target), 'real','real', '÷'); };
+        model['カッコ'] = function(e){console.log('()')};
+        model['(比較演算)'] = create_compare_model('real');
+        console.log('b');
+        break;
+    case 'int':
+        model['＋'] = function(e){console.log('+')};
+        model['−'] = function(e){console.log('-')};
+        model['×'] = function(e){console.log('x')};
+        model['÷'] = function(e){console.log('/')};
+        model['カッコ'] = function(e){console.log('()')};
+        model['(比較演算)'] = create_compare_model('int');
+        break;
+    case 'bool':
+    case 'onoff':
+        model['AND'] = function(e){ bin_ope_replace($(event.target), $(event.target).attr('vtype'), $(event.target).attr('vtype'), 'AND'); };
+        model['OR']  = function(e){ bin_ope_replace($(event.target), $(event.target).attr('vtype'), $(event.target).attr('vtype'), 'OR'); };
+        model['NOT'] = function(e){console.log('&&');};
+        model['＝']  = function(e){ bin_ope_replace($(event.target), $(event.target).attr('vtype'), $(event.target).attr('vtype'), '＝'); };
+        break;
+    case 'string':
+        break;
+    }
+    console.log('c ' + model);
+    contextMenu_show($('.main_canvas'), 'expression',  model);
+
+    $(".ctx_menu").css("top", event.offsetY+ $(event.target).offset().top);
+    $(".ctx_menu").css("left", event.offsetX);// + $(event.target).offset().left);
+    return false;
+}
+
 //------------------------------------------------------------
 // 文ウィジェット生成
 //------------------------------------------------------------
@@ -170,7 +369,7 @@ var onStmHollClick = function(event) {
 var createIfStatement = function (parent) {
     var html ='';  
     html += '<div class="stm" id="' + id_generator.generate('stm') + '">';
-    html += '❔<span class="exp_holl" id="' + id_generator.generate('eholl') + '"></span>ですか？<br/>';
+    html += '❔<span class="exp_holl" vtype="bool" id="' + id_generator.generate('eholl') + '"></span>ですか？<br/>';
     html += '&nbsp;→(Yes)<div class="stm_holl" id="' + id_generator.generate('sholl') +'"></div>'; 
     html += '&nbsp;→(No)<div class="stm_holl" id="' + id_generator.generate('sholl') +'"></div>'; 
     html += '</div>';
@@ -187,10 +386,11 @@ var createIfStatement = function (parent) {
     $('.stm_holl').bind("dragover", onDragOver);
     $('.stm_holl').bind("drop", onStmDrop);
 };
+
 var createAfterDoStatement = function (parent) {
     var html ='';
     html += '<div class="stm" id="' + id_generator.generate('stm') +'">';
-    html += '⏰ <span class="exp_holl" id="' + id_generator.generate('eholl')+'"></span> 秒後に以下を Do!';
+    html += '⏰ <span class="exp_holl" vtype="real" id="' + id_generator.generate('eholl')+'"></span> 秒後に以下を Do!';
     html += '<div class="stm_holl" id="' + id_generator.generate('sholl') +'"></div>';
     html += '</div>';
     $(parent).append(html)
@@ -210,8 +410,8 @@ var createAfterDoStatement = function (parent) {
 var createWaitUntilStatement = function(parent) {
     var html ='';
     html += '<div class="stm" id="' + id_generator.generate('stm') +'">';
-    html += '✅ <span class="exp_holl" id="' + id_generator.generate('eholl')+'"></span> になるまで';
-    html += '⏳ <span class="exp_holl" id="' + id_generator.generate('eholl')+'"></span> 秒待つ';
+    html += '✅ <span class="exp_holl" vtype="bool" id="' + id_generator.generate('eholl')+'"></span> になるまで';
+    html += '<span class="exp_holl" vtype="real" id="' + id_generator.generate('eholl')+'"></span> 秒待つ';
     html += '</div>';
     $(parent).append(html)
 
@@ -229,7 +429,7 @@ var createWaitUntilStatement = function(parent) {
 var createWaitStatement = function(parent) {
     var html ='';
     html += '<div class="stm" id="' + id_generator.generate('stm') +'">';
-    html += '⏳ <span class="exp_holl" id="' + id_generator.generate('eholl')+'"></span> 秒待つ';
+    html += '⏳ <span class="exp_holl" vtype="real" id="' + id_generator.generate('eholl')+'"></span> 秒待つ';
     html += '</div>';
     $(parent).append(html)
 
@@ -287,19 +487,21 @@ var editStatementTitle = function(event){
     if ($(event.target).attr("class") != "stm_title") {
         return false;
     }
-    if ($(event.target).attr("mode") == "edit") {
-        var txt = $(event.target).find('input').val();
-        $(event.target).text('「' + txt + '」');
-        $(event.target).remove('input');
-        $(event.target).attr("mode", 'view');
-    }
-    else {
-        var txt = $(event.target).text();
-        $(event.target).text('');
-        $(event.target).append('「<input type="text" value="' + txt.slice(1,-1) + '"/>」');
-        $(event.target).append('☑');
-        $(event.target).attr("mode", 'edit');
-    }
+    editText($(event.target),  '「', '」');
+
+    // if ($(event.target).attr("mode") == "edit") {
+    //     var txt = $(event.target).find('input').val();
+    //     $(event.target).text('「' + txt + '」');
+    //     $(event.target).remove('input');
+    //     $(event.target).attr("mode", 'view');
+    // }
+    // else {
+    //     var txt = $(event.target).text();
+    //     $(event.target).text('');
+    //     $(event.target).append('「<input type="text" value="' + txt.slice(1,-1) + '"/>」');
+    //     $(event.target).append('☑');
+    //     $(event.target).attr("mode", 'edit');
+    // }
     return false;
 }
 
@@ -354,25 +556,110 @@ function onOpenScenarioWindow(event){
     }
 }
 
-function onMakeVariable(event) {
-    console.log("onMakeVariable");
-    if ($(event.target).attr("id") != "make_variable") {
-        return false;
-    }
-    var vid = "var-" + $(".variable").length;
-    console.log("id=" + vid);
 
-    $(".main_canvas").append($("<div class='variable' id=" + vid + " varname='名無しさん'>変数:<span class='vname'>名無しさん</span><div class='vvalue'>42</div></div>"));
-    $("#"+ vid).attr("draggable","true");
-    $("#"+ vid).bind("dragstart", onDragStart);
+//------------------------------------------------------------
+// 式ウィジェット作成（値コンストラクタ）
+//------------------------------------------------------------
 
+var createRealNumConstractor = function (parent, value) {
+    var exp_id      = id_generator.generate('exp')
 
-    $(".world_menu").css("visibility", "hidden");
+    var html = '';
+    html += '<span class="exp" vtype="real" id="' + exp_id + '">';
+    html += '<input type="number" style="width:3em;" value="'+value+'">';
+    html += '<span class="operator_editor" vtype="real">✒</span>';
+    html += '</span>';
+
+    $(parent).append(html);
+
+	$("#"+exp_id).attr("draggable","true");
+    $("#"+exp_id).bind("dragstart", onDragStart);
+};
+
+var createIntNumConstractor = function (parent, value) {
+    var exp_id      = id_generator.generate('exp')
+
+    var html = '';
+    html += '<span class="exp" vtype="int" id="' + exp_id + '">';
+    html += '<input type="number" style="width:3em;" value="'+value+'">';
+    html += '<span class="operator_editor" vtype="int">✒</span>';
+    html += '</span>';
+
+    $(parent).append(html);
+
+	$("#"+exp_id).attr("draggable","true");
+    $("#"+exp_id).bind("dragstart", onDragStart);
+};
+
+var createBoolConstractor = function (parent, value, t_str, f_str ) {
+
+    var exp_id      = id_generator.generate('exp')
+
+    var t_selected = value == true  ? 'selected' : ''; 
+    var f_selected = value == false ? 'selected' : ''; 
+
+    var html = '';
+    html += '<span class="exp" id="' + exp_id + '">';
+    html += '<select>';
+    html += '<option value="true" ' + t_selected + '>' + t_str + '</option>';
+    html += '<option value="fale" ' + f_selected + '>' + f_str + '</option>';
+    html += '</select>';
+    html += '<span class="operator_editor" vtype="bool">✒</span>';
+    html += '</span>';
+
+    $(parent).append(html);
+
+	$("#"+exp_id).attr("draggable","true");
+    $("#"+exp_id).bind("dragstart", onDragStart);
 }
+
+var createStringConstractor = function (parent, value) {
+    var exp_id      = id_generator.generate('exp')
+
+    var html = '';
+    html += '<span class="exp" vtype="real" id="' + id_generator.generate('exp')+ '">';
+    html += '<input type="text" value="'+value+'">';
+    html += '<span class="operator_joint" vtype="string">➡</span>';
+    html += '</span>';
+
+    $(parent).append(html);
+
+	$("#"+exp_id).attr("draggable","true");
+    $("#"+exp_id).bind("dragstart", onDragStart);
+};
 
 
 //------------------------------------------------------------
-// コンテキストメニュー
+// 式ウィジェット作成（値コンストラクタ）
+//------------------------------------------------------------
+var createBinOperatorWidget = function(parent, ret_type, param_type, operator, rhs) {
+    var exp_id      = id_generator.generate('exp')
+    var rhs_holl_id = id_generator.generate('eholl');
+    var lhs_holl_id = id_generator.generate('eholl');
+
+    var html = '';
+    html += '<span class="exp" '
+         + 'id="'       + exp_id + '" '
+         + 'vtype="'    + ret_type + '" '
+         + 'operator="' + operator + '" '
+         + '>';
+    html += '<span class="exp_holl" vtype="' + param_type + '" id="' + rhs_holl_id + '"></span>';
+    html += '&nbsp;' + operator + '&nbsp;';
+    html += '<span class="exp_holl" vtype="' + param_type + '" id="' + lhs_holl_id + '"></span>';
+    html += '</span>';
+
+    $(parent).append(html);
+    if (rhs != undefined) {
+        console.log(rhs);
+        $('#'+rhs_holl_id).append($(rhs));
+    }
+
+	$("#"+exp_id).attr("draggable","true");
+    $("#"+exp_id).bind("dragstart", onDragStart);
+}
+
+//------------------------------------------------------------
+// コンテキストメニュー（共通部品）
 //------------------------------------------------------------
 
 var contextMenu_show = function (parent, title, model) {
@@ -410,6 +697,8 @@ var contextMenu_show = function (parent, title, model) {
         }
     });
 };
+
+
 
 //------------------------------------------------------------
 // スクリプトパネルの生成
@@ -450,19 +739,8 @@ var editScriptTitle = function(event){
     if ($(event.target).attr("class") != "script_title") {
         return false;
     }
-    if ($(event.target).attr("mode") == "edit") {
-        var txt = $(event.target).find('input').val();
-        $(event.target).text('「' + txt + '」');
-        $(event.target).remove('input');
-        $(event.target).attr("mode", 'view');
-    }
-    else {
-        var txt = $(event.target).text();
-        $(event.target).text('');
-        $(event.target).append('「<input type="text" value="' + txt.slice(1,-1) + '"/>」');
-        $(event.target).append('☑');
-        $(event.target).attr("mode", 'edit');
-    }
+
+    editText($(event.target),  '「', '」');
     return false;
 }
 

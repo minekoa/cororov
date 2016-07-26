@@ -164,11 +164,18 @@ body {
 */
 .exp {
 	border-radius: 10px;
-	border:1px solid #979;
-	padding: 2px;
+/*	border:1px solid #979; */
+/*	padding: 2px; */
+/*	margin:2px; */
+    padding:0;
+    margin:0;
 	background-color: #EFE;
-	margin:2px;
-	padding: 1px 0.5em;
+/*	padding: 1px 0.5em; */
+    display:inline-block;
+    height:100%;
+    vertical-align: middle;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
 }
 
 .stm_holl {
@@ -176,15 +183,27 @@ body {
 	background-color:#666;
 	padding-bottom:1em;
 	-khtml-user-drag: element;
+/*    vertical-align:center;*/
 }
 
 .exp_holl {
-	min-width:50px;
-    border: 1px solid #888;
-    border-radius: 20px;
+    border:0;
+    paddng:0;
+    margin:0;
+	min-width:1.5em;
+    display:inline-block;
+    height: 1em;
+/*    border: 1px solid #888; */
+/*    border-radius: 20px; */
+    border-radius: 10px;
     background-color:#888;
-    padding:0.1em 0.3em;
+/*    padding:0.1em 0.3em; */
     -khtml-user-drag: element;
+/*    padding-left: 0.5em; */
+/*    padding-right: 0.5em; */
+
+    vertical-align: middle;
+    height:1.5em;
 }
 
 .script_tray_header {
