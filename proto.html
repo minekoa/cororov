@@ -66,7 +66,10 @@ $(function() {
     $(".script_tray").on('click', '.exp_holl', onExpHollClick);
     $(".script_tray").on('click', '.operator_editor', onOperatorEditClick);
 
+    $(".script_tray").on('click', '.literal_value', editLiteralValue);
+
     $(".main_canvas").on('click', '.vname', editVariableName);
+    $(".main_canvas").on('click', '.literal_value', editLiteralValue);
 
     $("#rubbishtip").attr("dropzone","move");
     $("#rubbishtip").bind("dragover", onDragOver);

@@ -21,7 +21,59 @@ var editText = function(target, open_char, close_char){
     else {
         var txt = $(target).text();
         $(target).text('');
-        $(target).append(open_char + '<input type="text" value="' + txt.slice(1,-1) + '"/>' + close_char);
+        if (open_char.length != 0) {
+            txt = txt.slice(1,-1);
+        }
+
+        $(target).append(open_char + '<input type="text" value="' + txt + '"/>' + close_char);
+        $(target).append('☑');
+        $(target).attr("mode", 'edit');
+    }
+};
+
+var editNumber = function(target, open_char, close_char){
+    if ($(target).attr("mode") == "edit") {
+        var txt = $(target).children('input').val();
+        $(target).text(open_char + txt + close_char);
+        $(target).remove('input');
+        $(target).attr("mode", 'view');
+    }
+    else {
+        var txt = $(target).text();
+        if (open_char.length != 0) {
+            txt = txt.slice(1,-1);
+        }
+
+        $(target).text('');
+        $(target).append(open_char + '<input type="number" value="' + txt + '"/>' + close_char);
+        $(target).append('☑');
+        $(target).attr("mode", 'edit');
+    }
+};
+
+var editSelect = function(target, open_char, close_char, options){
+    if ($(target).attr("mode") == "edit") {
+        var txt = $(target).children('select').val();
+        $(target).text(open_char + txt + close_char);
+        $(target).remove('input');
+        $(target).attr("mode", 'view');
+    }
+    else {
+        var txt = $(target).text();
+        if (open_char.length != 0) {
+            txt = txt.slice(1,-1);
+        }
+        $(target).text('');
+
+        var html = '';
+        html += '<select>';
+        for (value of options) {
+            var selected = (value == txt) ? 'selected' : '';
+            html += '<option value="' + value + '" ' + selected + '>' + value + '</option>';
+        }
+        html += '</select>';
+
+        $(target).append(open_char + html + close_char);
         $(target).append('☑');
         $(target).attr("mode", 'edit');
     }
@@ -189,10 +241,10 @@ var createVariableWidget = function(event, parent, vtype){
         createIntNumConstractor($(dom).children('.vvalue'), 0);
         break;
     case 'bool':
-        createBoolConstractor($(dom).children('.vvalue'), true, 'true', 'false');
+        createBoolConstractor($(dom).children('.vvalue'), true, 'bool', 'true', 'false');
         break;
     case 'onoff':
-        createBoolConstractor($(dom).children('.vvalue'), true, 'ON', 'OFF');
+        createBoolConstractor($(dom).children('.vvalue'), true, 'onoff','ON', 'OFF');
         break;
     case 'string':
         createStringConstractor($(dom).children('.vvalue'), '');
@@ -279,15 +331,15 @@ var onExpHollClick = function(event) {
     var model={};
     switch ($(event.target).attr('vtype')) {
     case 'real':
-        model['値を入れる'] = function(e){createRealNumConstractor(event.target, 0.0);};
+        model['即値をセット'] = function(e){createRealNumConstractor(event.target, 0.0);};
         break;
     case 'int':
-        model['値を入れる'] = function(e){createIntNumConstractor(event.target, 0);};
+        model['即値をセット'] = function(e){createIntNumConstractor(event.target, 0);};
         break;
     case 'bool':
     case 'onoff':
-        model['値を入れる(true/false)'] = function(e){createBoolConstractor(event.target, true, 'true', 'false');};
-        model['値を入れる(on/off)']     = function(e){createBoolConstractor(event.target, true, 'ON', 'OFF');};
+        model['即値をセット(true/false)'] = function(e){createBoolConstractor(event.target, true, 'bool', 'true', 'false');};
+        model['即値をセット(on/off)']     = function(e){createBoolConstractor(event.target, true, 'onoff', 'ON', 'OFF');};
         break;
     case 'string':
         model['値を入れる'] = function(e){createStringConstractor(event.target, '');};
@@ -297,7 +349,7 @@ var onExpHollClick = function(event) {
     contextMenu_show($('.main_canvas'), 'expression',  model);
 
     $(".ctx_menu").css("top", event.offsetY+ $(event.target).offset().top);
-//    $(".ctx_menu").css("left", event.offsetX + $(event.target).offset().left);
+    $(".ctx_menu").css("left", event.offsetX + $(event.target).offset().left);
     return false;
 }
 
@@ -332,7 +384,6 @@ var onOperatorEditClick = function(event) {
         model['−'] = function(e){ bin_ope_replace($(event.target), 'real','real', '−'); };
         model['×'] = function(e){ bin_ope_replace($(event.target), 'real','real', '×'); };
         model['÷'] = function(e){ bin_ope_replace($(event.target), 'real','real', '÷'); };
-        model['カッコ'] = function(e){console.log('()')};
         model['(比較演算)'] = create_compare_model('real');
         console.log('b');
         break;
@@ -341,7 +392,6 @@ var onOperatorEditClick = function(event) {
         model['−'] = function(e){console.log('-')};
         model['×'] = function(e){console.log('x')};
         model['÷'] = function(e){console.log('/')};
-        model['カッコ'] = function(e){console.log('()')};
         model['(比較演算)'] = create_compare_model('int');
         break;
     case 'bool':
@@ -358,7 +408,7 @@ var onOperatorEditClick = function(event) {
     contextMenu_show($('.main_canvas'), 'expression',  model);
 
     $(".ctx_menu").css("top", event.offsetY+ $(event.target).offset().top);
-    $(".ctx_menu").css("left", event.offsetX);// + $(event.target).offset().left);
+    $(".ctx_menu").css("left", $(event.target).offset().left);
     return false;
 }
 
@@ -488,20 +538,6 @@ var editStatementTitle = function(event){
         return false;
     }
     editText($(event.target),  '「', '」');
-
-    // if ($(event.target).attr("mode") == "edit") {
-    //     var txt = $(event.target).find('input').val();
-    //     $(event.target).text('「' + txt + '」');
-    //     $(event.target).remove('input');
-    //     $(event.target).attr("mode", 'view');
-    // }
-    // else {
-    //     var txt = $(event.target).text();
-    //     $(event.target).text('');
-    //     $(event.target).append('「<input type="text" value="' + txt.slice(1,-1) + '"/>」');
-    //     $(event.target).append('☑');
-    //     $(event.target).attr("mode", 'edit');
-    // }
     return false;
 }
 
@@ -566,7 +602,7 @@ var createRealNumConstractor = function (parent, value) {
 
     var html = '';
     html += '<span class="exp" vtype="real" id="' + exp_id + '">';
-    html += '<input type="number" style="width:3em;" value="'+value+'">';
+    html += '<span class="literal_value" vtype="real">' + value + '</span>';
     html += '<span class="operator_editor" vtype="real">✒</span>';
     html += '</span>';
 
@@ -581,7 +617,7 @@ var createIntNumConstractor = function (parent, value) {
 
     var html = '';
     html += '<span class="exp" vtype="int" id="' + exp_id + '">';
-    html += '<input type="number" style="width:3em;" value="'+value+'">';
+    html += '<span class="literal_value" vtype="int">' + value + '</span>';
     html += '<span class="operator_editor" vtype="int">✒</span>';
     html += '</span>';
 
@@ -591,20 +627,14 @@ var createIntNumConstractor = function (parent, value) {
     $("#"+exp_id).bind("dragstart", onDragStart);
 };
 
-var createBoolConstractor = function (parent, value, t_str, f_str ) {
+var createBoolConstractor = function (parent, value, vtype, t_str, f_str ) {
 
     var exp_id      = id_generator.generate('exp')
 
-    var t_selected = value == true  ? 'selected' : ''; 
-    var f_selected = value == false ? 'selected' : ''; 
-
     var html = '';
     html += '<span class="exp" id="' + exp_id + '">';
-    html += '<select>';
-    html += '<option value="true" ' + t_selected + '>' + t_str + '</option>';
-    html += '<option value="fale" ' + f_selected + '>' + f_str + '</option>';
-    html += '</select>';
-    html += '<span class="operator_editor" vtype="bool">✒</span>';
+    html += '<span class="literal_value" vtype="' + vtype + '">' + (value ? t_str : f_str) + '</span>';
+    html += '<span class="operator_editor" vtype="' + vtype + '">✒</span>';
     html += '</span>';
 
     $(parent).append(html);
@@ -618,7 +648,7 @@ var createStringConstractor = function (parent, value) {
 
     var html = '';
     html += '<span class="exp" vtype="real" id="' + id_generator.generate('exp')+ '">';
-    html += '<input type="text" value="'+value+'">';
+    html += '<span class="literal_value" vtype="string">' + value + '</span>';
     html += '<span class="operator_joint" vtype="string">➡</span>';
     html += '</span>';
 
@@ -628,6 +658,31 @@ var createStringConstractor = function (parent, value) {
     $("#"+exp_id).bind("dragstart", onDragStart);
 };
 
+var editLiteralValue = function (event) {
+    if ($(event.target).attr("class") != "literal_value") {
+        return false;
+    }
+
+    switch ($(event.target).attr('vtype')) {
+    case 'real':
+        editNumber($(event.target), '','');
+        break;
+    case 'int':
+        editNumber($(event.target), '','');
+        break;
+    case 'bool':
+        editSelect($(event.target), '','', ['true','false']);
+        break;
+    case 'onoff':
+        editSelect($(event.target), '','', ['ON','OFF']);
+        break;
+    case 'string':
+        editText($(event.target),  '', '');
+        break;
+    }
+
+    return false;
+};
 
 //------------------------------------------------------------
 // 式ウィジェット作成（値コンストラクタ）
@@ -643,9 +698,12 @@ var createBinOperatorWidget = function(parent, ret_type, param_type, operator, r
          + 'vtype="'    + ret_type + '" '
          + 'operator="' + operator + '" '
          + '>';
+    html += '<span style="font-size:1.0em">(</span>';
     html += '<span class="exp_holl" vtype="' + param_type + '" id="' + rhs_holl_id + '"></span>';
     html += '&nbsp;' + operator + '&nbsp;';
     html += '<span class="exp_holl" vtype="' + param_type + '" id="' + lhs_holl_id + '"></span>';
+    html += '<span style="font-size:1.0em">)</span>';
+    html += "<span class='operator_editor' vtype='" + ret_type + "'>✒</span>";
     html += '</span>';
 
     $(parent).append(html);

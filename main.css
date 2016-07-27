@@ -167,6 +167,11 @@ body {
 /*	border:1px solid #979; */
 /*	padding: 2px; */
 /*	margin:2px; */
+
+    /* カッコに見えるように...*/
+/*    border-left:1px solid black;
+    border-right:1px solid black;
+*/
     padding:0;
     margin:0;
 	background-color: #EFE;
@@ -178,6 +183,10 @@ body {
     padding-right: 0.5em;
 }
 
+.literal_value {
+    color: #0A0;
+}
+
 .stm_holl {
     margin-left:2.0em;
 	background-color:#666;
@@ -185,7 +194,11 @@ body {
 	-khtml-user-drag: element;
 /*    vertical-align:center;*/
 }
-
+.stm_holl:after {
+    color:#444;
+    content:"クリックして文を追加";
+    padding-left:1em;
+}
 .exp_holl {
     border:0;
     paddng:0;
@@ -202,8 +215,18 @@ body {
 /*    padding-left: 0.5em; */
 /*    padding-right: 0.5em; */
 
+	background-color: #EFE;
     vertical-align: middle;
     height:1.5em;
+}
+.exp_holl:empty {
+    background-color:#888;
+}
+
+.operator_editor {
+    font-size:0.9em;
+    color: #66A;
+//    background-color: #FEE;
 }
 
 .script_tray_header {
