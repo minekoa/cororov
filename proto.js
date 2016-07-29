@@ -79,6 +79,7 @@ var editSelect = function(target, open_char, close_char, options){
     }
 };
 
+
 //------------------------------------------------------------
 // Drag and Drop
 //------------------------------------------------------------
@@ -226,11 +227,13 @@ var createVariableWidget = function(event, parent, vtype){
 
     var html = '';
     html += '<div class="variable" id="'+ vid +'" vname="' + vid +'" vtype="' + vtype + '">';
-    html += '変数:<span class="vname">['+ vid +']</span></br>';
+    html += '<span class="vname">['+ vid +']</span> :<span class="vtype"></span></br>';
     html += '<div class="vvalue" vtype="'+vtype+'">';
     html += '</div>';
     html += '</div>';
     var dom = $(html);
+
+    $(dom).children('.vtype').text(vtype);
 
     // 暫定（値コンストラクターを流用）
     switch (vtype) {
@@ -248,6 +251,9 @@ var createVariableWidget = function(event, parent, vtype){
         break;
     case 'string':
         createStringConstractor($(dom).children('.vvalue'), '');
+        break;
+    case 'pos':
+        createPositionConstructor($(dom).children('.vvalue'), {x:0,y:0,z:0,roll:0,pitch:0,yaw:0});
         break;
     }
 
@@ -344,12 +350,16 @@ var onExpHollClick = function(event) {
     case 'string':
         model['値を入れる'] = function(e){createStringConstractor(event.target, '');};
         break;
+    case 'pos':
+        model['即値をセット（位置と座標）'] = function(e){createPositionConstructor(event.target, {x:0,y:0,z:0,roll:0,pitch:0,yaw:0});};
+        break;
     }
 
     contextMenu_show($('.main_canvas'), 'expression',  model);
 
     $(".ctx_menu").css("top", event.offsetY+ $(event.target).offset().top);
-    $(".ctx_menu").css("left", event.offsetX + $(event.target).offset().left);
+    $(".ctx_menu").css("left", $(event.target).offset().left);
+//    $(".ctx_menu").css("left", event.offsetX + $(event.target).offset().left);
     return false;
 }
 
@@ -375,6 +385,13 @@ var onOperatorEditClick = function(event) {
         $(rhs).remove();
         createBinOperatorWidget(parent, rettype, paramtype, operator, rhs);
     };
+    var un_ope_replace = function(target, rettype, paramtype, operator) {
+        var rhs    = $(target).parent()
+        var parent = $(rhs).parent();
+        $(rhs).remove();
+        createUnnaryOperatorWidget(parent, rettype, paramtype, operator, rhs);
+    };
+
 
     var model={};
     switch ($(event.target).attr('vtype')) {
@@ -398,7 +415,7 @@ var onOperatorEditClick = function(event) {
     case 'onoff':
         model['AND'] = function(e){ bin_ope_replace($(event.target), $(event.target).attr('vtype'), $(event.target).attr('vtype'), 'AND'); };
         model['OR']  = function(e){ bin_ope_replace($(event.target), $(event.target).attr('vtype'), $(event.target).attr('vtype'), 'OR'); };
-        model['NOT'] = function(e){console.log('&&');};
+        model['NOT'] = function(e){ un_ope_replace($(event.target), $(event.target).attr('vtype'), $(event.target).attr('vtype'), 'NOT'); };
         model['＝']  = function(e){ bin_ope_replace($(event.target), $(event.target).attr('vtype'), $(event.target).attr('vtype'), '＝'); };
         break;
     case 'string':
@@ -419,7 +436,7 @@ var onOperatorEditClick = function(event) {
 var createIfStatement = function (parent) {
     var html ='';  
     html += '<div class="stm" id="' + id_generator.generate('stm') + '">';
-    html += '❔<span class="exp_holl" vtype="bool" id="' + id_generator.generate('eholl') + '"></span>ですか？<br/>';
+    html += '<div class="exp_line">❔<span class="exp_holl" vtype="bool" id="' + id_generator.generate('eholl') + '"></span>ですか？</div>';
     html += '&nbsp;→(Yes)<div class="stm_holl" id="' + id_generator.generate('sholl') +'"></div>'; 
     html += '&nbsp;→(No)<div class="stm_holl" id="' + id_generator.generate('sholl') +'"></div>'; 
     html += '</div>';
@@ -648,8 +665,27 @@ var createStringConstractor = function (parent, value) {
 
     var html = '';
     html += '<span class="exp" vtype="real" id="' + id_generator.generate('exp')+ '">';
-    html += '<span class="literal_value" vtype="string">' + value + '</span>';
-    html += '<span class="operator_joint" vtype="string">➡</span>';
+    html += '<span class="literal_value" vtype="string">"' + value + '"</span>';
+    html += '<span class="operator_joint" vtype="string">✒</span>';
+    html += '</span>';
+
+    $(parent).append(html);
+
+	$("#"+exp_id).attr("draggable","true");
+    $("#"+exp_id).bind("dragstart", onDragStart);
+};
+
+var createPositionConstructor = function (parent, value) {
+    var exp_id      = id_generator.generate('exp')
+
+    var html = '';
+    html += '<span class="exp" vtype="pos" id="' + exp_id+ '">';
+    html += 'x,y,z:<span class="literal_value" vtype="real">' + value['x'] + '</span>,';
+    html += '<span class="literal_value" vtype="real">' + value['y'] + '</span>,';
+    html += '<span class="literal_value" vtype="real">' + value['z'] + '</span><br>';
+    html += 'roll,pitch,yaw:<span class="literal_value" vtype="real">' + value['roll'] + '</span>,';
+    html += '<span class="literal_value" vtype="real">' + value['pitch'] + '</span>,';
+    html += '<span class="literal_value" vtype="real">' + value['yaw'] + '</span>';
     html += '</span>';
 
     $(parent).append(html);
@@ -677,7 +713,7 @@ var editLiteralValue = function (event) {
         editSelect($(event.target), '','', ['ON','OFF']);
         break;
     case 'string':
-        editText($(event.target),  '', '');
+        editText($(event.target),  '"', '"');
         break;
     }
 
@@ -698,11 +734,39 @@ var createBinOperatorWidget = function(parent, ret_type, param_type, operator, r
          + 'vtype="'    + ret_type + '" '
          + 'operator="' + operator + '" '
          + '>';
-    html += '<span style="font-size:1.0em">(</span>';
+    html += '<wbr>(';
     html += '<span class="exp_holl" vtype="' + param_type + '" id="' + rhs_holl_id + '"></span>';
     html += '&nbsp;' + operator + '&nbsp;';
     html += '<span class="exp_holl" vtype="' + param_type + '" id="' + lhs_holl_id + '"></span>';
-    html += '<span style="font-size:1.0em">)</span>';
+    html += ')';
+    html += "<span class='operator_editor' vtype='" + ret_type + "'>✒</span>";
+    html += '</span>';
+
+    $(parent).append(html);
+    if (rhs != undefined) {
+        console.log(rhs);
+        $('#'+rhs_holl_id).append($(rhs));
+    }
+
+	$("#"+exp_id).attr("draggable","true");
+    $("#"+exp_id).bind("dragstart", onDragStart);
+}
+
+var createUnnaryOperatorWidget = function(parent, ret_type, param_type, operator, rhs) {
+    var exp_id      = id_generator.generate('exp')
+    var rhs_holl_id = id_generator.generate('eholl');
+    var lhs_holl_id = id_generator.generate('eholl');
+
+    var html = '';
+    html += '<span class="exp" '
+         + 'id="'       + exp_id + '" '
+         + 'vtype="'    + ret_type + '" '
+         + 'operator="' + operator + '" '
+         + '>';
+    html += '(';
+    html += operator + '&nbsp;';
+    html += '<span class="exp_holl" vtype="' + param_type + '" id="' + rhs_holl_id + '"></span>';
+    html += ')';
     html += "<span class='operator_editor' vtype='" + ret_type + "'>✒</span>";
     html += '</span>';
 
@@ -762,15 +826,6 @@ var contextMenu_show = function (parent, title, model) {
 // スクリプトパネルの生成
 //------------------------------------------------------------
 
-var onScriptTrayClick = function() {
-    if ($(this).attr('class') != 'script_tray') {
-        return false;
-    }
-
-    createScriptPanel($(this), $(this).attr('category'), null);
-    return false;
-}
-
 var createScriptPanel = function(parent, type,  model) {
     var script_id = id_generator.generate('script');
     var html_template= '<div class="scn_segment" id="' + script_id + '">';
@@ -792,6 +847,24 @@ var createScriptPanel = function(parent, type,  model) {
     html_template += '<div class="stm_holl" style="margin:0;" id="' + id_generator.generate('sholl')+ '"></div></div>';
     $(parent).append(html_template);
 };
+
+var onScriptTrayClick = function(event) {
+    if ($(event.target).attr('class') != 'script_tray') {
+        return false;
+    }
+
+    var model = {};
+    model['スクリプトの追加'] = function(e){
+        createScriptPanel($(event.target), $(event.target).attr('category'), null);
+    };
+    contextMenu_show($('.main_canvas'), 'script tray',  model);
+
+    $(".ctx_menu").css("top", event.offsetY + $(event.target).offset().top);
+    $(".ctx_menu").css("left", event.offsetX + $(event.target).offset().left);
+    
+    return false;
+}
+
 
 var editScriptTitle = function(event){
     if ($(event.target).attr("class") != "script_title") {

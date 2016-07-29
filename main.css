@@ -24,10 +24,11 @@ body {
 .variable {
 	border-radius: 20px;
 	border: 3px solid #77F;
-        background-color: #AAF;
+    background-color: #AAF;
 	padding:0.5em;
-	width:8em;
-        text-align:center;
+	min-width:8em;
+/*	width:8em;*/
+    text-align:center;
 	position:absolute;
 }
 .vname {
@@ -162,71 +163,87 @@ body {
 	background-color: #EFE;
 }
 */
-.exp {
-	border-radius: 10px;
-/*	border:1px solid #979; */
-/*	padding: 2px; */
-/*	margin:2px; */
-
-    /* カッコに見えるように...*/
-/*    border-left:1px solid black;
-    border-right:1px solid black;
-*/
-    padding:0;
-    margin:0;
-	background-color: #EFE;
-/*	padding: 1px 0.5em; */
-    display:inline-block;
-    height:100%;
-    vertical-align: middle;
-    padding-left: 0.5em;
-    padding-right: 0.5em;
-}
-
-.literal_value {
-    color: #0A0;
-}
 
 .stm_holl {
     margin-left:2.0em;
 	background-color:#666;
-	padding-bottom:1em;
+	padding-bottom:0.1em;
 	-khtml-user-drag: element;
 /*    vertical-align:center;*/
 }
 .stm_holl:after {
     color:#444;
+    font-size:0.5em;
     content:"クリックして文を追加";
     padding-left:1em;
 }
+
+.exp {
+	border-radius: 10px;
+    border:0;
+    padding:0;
+    margin:0;
+	background-color: #EFE;
+    display:inline-block;
+/*    display:table-cell; */
+    vertical-align: middle;
+
+    height:100%;
+/*    padding-left: 0.5em;
+    padding-right: 0.5em;*/
+    padding-left: 0.2em;
+    padding-right: 0.2em;
+}
+
 .exp_holl {
     border:0;
-    paddng:0;
+    padding:0;
     margin:0;
-	min-width:1.5em;
+/*	min-width:1.5em; */
     display:inline-block;
-    height: 1em;
-/*    border: 1px solid #888; */
-/*    border-radius: 20px; */
-    border-radius: 10px;
-    background-color:#888;
-/*    padding:0.1em 0.3em; */
     -khtml-user-drag: element;
-/*    padding-left: 0.5em; */
-/*    padding-right: 0.5em; */
-
-	background-color: #EFE;
+/*	background-color: #EFE; */
     vertical-align: middle;
-    height:1.5em;
 }
 .exp_holl:empty {
+    display:inline-block;
+    border-radius: 10px;
     background-color:#888;
+    height:1.5em;
+    width:1em;
+}
+
+.exp_line {
+/*    border:1px dotted red; */
+/*
+    vertical-align:middle;
+    overflow:auto;
+
+    display:flex;
+    flex-direction:row;
+    flex-wrap:wrap;
+*/
+}
+
+.literal_value {
+    color: #0A0;
+    vertical-align: middle;
+    display:inline-block;
+    border:0;
+    padding:0;
+    margin:0;
 }
 
 .operator_editor {
+    display:inline-block;
     font-size:0.9em;
     color: #66A;
-//    background-color: #FEE;
+    background-color: #FEE;
+    border-radius: 10px;
+    vertical-align: middle;
+    border:0;
+    padding:0;
+    margin:0;
 }
 
 .script_tray_header {
