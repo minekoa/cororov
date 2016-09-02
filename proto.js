@@ -105,6 +105,7 @@ function onStmDrop(event) {
 
     if ($('#'+id_name).attr("class") == "stm") {
         $('#'+id_name).appendTo($(event.target));
+        return false;
     }
     else if ($('#'+id_name).attr("class") == "variable") {
 	    var vname = $('#'+id_name).attr("vname");
@@ -147,6 +148,7 @@ function onExpDrop(event) {
 
     if ( $('#'+id_name).attr("class") == "exp") {
 	    $('#'+id_name).appendTo($(event.target));
+        return false;
     }
     else if ($('#'+id_name).attr("class") == "variable") {
 	    var vname =$('#'+id_name).attr("vname");
@@ -180,6 +182,8 @@ var onRubbishtipDrop = function (event) {
     var id_name = event.originalEvent.dataTransfer.getData("text");
     console.log('on drop ' + id_name + " to " + event.target.id);
     $('#'+id_name).remove();
+
+    return false;
 }
 
 //------------------------------------------------------------
@@ -221,6 +225,26 @@ var editVariableName = function(event){
 //------------------------------------------------------------
 // Widgets Creator
 //------------------------------------------------------------
+
+var create3DViewWidget = function(event, parent) {
+    var vid = id_generator.generate('3dview');
+
+    var html = '';
+    html += '<div class="tdview_frame" id="' + vid + '">';
+    html += '<div>3D View</div>';
+    html += '<div id="tddemo"></div>';
+    html += '</div>';
+    $(parent).append(html);
+
+    $("#"+vid).css("top",  event.offsetY + $(event.target).offset().top);
+    $("#"+vid).css("left", event.offsetX + $(event.target).offset().left);
+
+    $("#"+ vid).attr("draggable","true");
+    $("#"+ vid).bind("dragstart", onDragStart);
+
+    createDemoScene($("#tddemo"));
+    return true;
+};
 
 var createVariableWidget = function(event, parent, vtype){
     var vid = id_generator.generate('var');
@@ -297,6 +321,7 @@ var onMainCanvasClick = function(event) {
     var model= {};
     model['変数の作成']     = v_menu;
     model['デバイスを追加'] = d_menu;
+    model['3Dビューを表示']   = function(e){create3DViewWidget(e, $('.main_canvas'));};
     model['編集を終了']     = function(e){console.log('quit edt');};
 
     contextMenu_show($('.main_canvas'), 'world',  model);

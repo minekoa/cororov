@@ -5,8 +5,12 @@
 	<link rel='stylesheet' href='main.css'>
     
 	<title></title>
-<script src="http://code.jquery.com/jquery-3.0.0.min.js"></script>
-<script src="proto.js" type="text/javascript"></script>
+    <script src="http://code.jquery.com/jquery-3.0.0.min.js"></script>
+    <script src="js/lib/three.js"></script>
+    <script src="js/lib/OrbitControls.js"></script>
+
+    <script src="js/3ddemo.js" type="text/javascript"></script>
+    <script src="proto.js" type="text/javascript"></script>
 <script>
 
 
@@ -74,6 +78,10 @@ $(function() {
     $("#rubbishtip").attr("dropzone","move");
     $("#rubbishtip").bind("dragover", onDragOver);
     $("#rubbishtip").bind("drop"    , onRubbishtipDrop);
+
+
+    /*3Dデモ*/
+/*    createDemoScene($("#3ddemo")); */
 });
 </script>
 </head>
