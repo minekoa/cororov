@@ -4,7 +4,9 @@ var createDemoScene = function(parent_dom) {
     var scene = new THREE.Scene();
 
     /* カメラ */
-    var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+    var camera = new THREE.PerspectiveCamera( 75, $(parent_dom).width() / $(parent_dom).height(), 0.1, 1000 );
+//    var camera = new THREE.OrthographicCamera ( -240, 240, 180, -180  );
+
     camera.position.set(10, 0, 20);
 
     /* レンダラー */
@@ -31,6 +33,11 @@ var createDemoScene = function(parent_dom) {
     var axis2 = new THREE.AxisHelper(1000);
     axis2.position.set(0,-7,0);
     scene.add(axis2);
+
+    /* グリッドを書く　*/
+    var grid = new THREE.GridHelper(50, 10); // size, step
+    grid.position.y = -7;
+    scene.add(grid);
 
     /* 遠近感を出したいのでフォグをかける  */
     scene.fog = new THREE.FogExp2( 0xffffff, 0.015 ); 
@@ -74,10 +81,12 @@ var createDemoScene = function(parent_dom) {
     directionalLight.castShadow = true;
 
     /* 視点をマウスでグリグリする */
+    if (controls) controls.dispose();
     var controls = new THREE.OrbitControls(camera);
+    controls.update();
 
-    function render() {
-        requestAnimationFrame(render);
+    function animate() {
+        requestAnimationFrame(animate);
 
         arrow1.rotation.x += 1 * Math.PI / 180;
 	    arrow1.rotation.y += 1 * Math.PI / 180;
@@ -92,9 +101,8 @@ var createDemoScene = function(parent_dom) {
 	    arrow2.position.z = Math.cos(new Date().getTime() /1000) * 5;
 
 
-        controls.update();
         renderer.render(scene, camera);
     }
-    render();
+    animate();
 };
 
